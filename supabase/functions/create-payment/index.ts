@@ -60,7 +60,8 @@ serve(async (req) => {
         user_id: userId,
         shipping_address: address,
         // Guardamos também o ID do cupão para o webhook
-        coupon_id: appliedCoupon ? appliedCoupon.id : null, 
+        coupon_id: appliedCoupon ? appliedCoupon.id : null,
+        shipping_method: `${shippingInfo.company.name} - ${shippingInfo.name}` 
       },
       back_urls: {
         success: `https://www.ladecants.com.br/success`,

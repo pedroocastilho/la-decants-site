@@ -147,7 +147,7 @@ export const allProducts = [
     id: 5,
     name: "Invictus Eau de Toilette - Paco Rabanne (Decant)",
     slug: "invictus-paco-rabanne",
-    stock: 10,
+    stock: 1,
     price: 52.70,
     originalPrice: 65.00,
     image: "https://i.imgur.com/gFhD1B8.jpeg",

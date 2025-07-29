@@ -51,6 +51,7 @@ serve(async (req) => {
         // 2. Calculamos o custo do frete a partir dos itens do pagamento
         const shippingItem = paymentDetails.additional_info.items.find(item => item.id === 'shipping');
         const shippingCost = shippingItem ? Number(shippingItem.unit_price) : 0;
+        const shippingMethod = metadata.shipping_method;
         // --- FIM DA CORREÇÃO ---
 
         const { data: orderData, error: orderError } = await supabaseAdmin
@@ -61,6 +62,7 @@ serve(async (req) => {
             status: 'approved',
             shipping_address: shippingAddress,
             shipping_cost: shippingCost,
+            shipping_method: shippingMethod,
           })
           .select()
           .single();
