@@ -28,6 +28,12 @@ export function AppProvider({ children }) {
   const [productToNotify, setProductToNotify] = useState(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const clearCart = () => {
+    setCartItems([]); // Limpa o estado local
+    if (session?.user) {
+      syncData({ cart_items: [] }); // Limpa a base de dados
+    }
+  };
 
   // --- EFEITO 1: GERE APENAS A SESSÃO ---
   useEffect(() => {
@@ -180,7 +186,7 @@ export function AppProvider({ children }) {
     isProductModalOpen, selectedProduct,
     notifyModalOpen, productToNotify, cartItemCount, favoritesCount,
     activeFiltersCount, filteredProducts,
-    allProducts, // <-- A LINHA QUE FALTAVA FOI ADICIONADA AQUI
+    allProducts, clearCart,
     addToCart, updateCartQuantity, removeFromCart, toggleFavorite,
     handleSearch, setFilters, setSortBy,
     openFiltersWithContext, setIsCartOpen, setIsFilterOpen,

@@ -22,19 +22,36 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Procura por um pedido aprovado do utilizador que contenha o produto
-    const { data, error } = await supabaseAdmin
+    // Passo 1: Encontra todos os IDs de pedidos que pertencem ao utilizador e foram aprovados.
+    const { data: orders, error: ordersError } = await supabaseAdmin
       .from('orders')
-      .select('id, order_items(product_id)')
+      .select('id')
       .eq('user_id', userId)
-      .eq('status', 'approved')
-      .eq('order_items.product_id', productId)
-      .limit(1);
+      .eq('status', 'approved');
 
-    if (error) throw error;
+    if (ordersError) throw ordersError;
 
-    // Se encontrou pelo menos um pedido, 'data' terá um item.
-    const hasPurchased = data && data.length > 0;
+    // Se o utilizador não tem pedidos aprovados, ele não comprou o produto.
+    if (!orders || orders.length === 0) {
+      return new Response(JSON.stringify({ hasPurchased: false }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    
+    // Extrai apenas os IDs dos pedidos.
+    const orderIds = orders.map(order => order.id);
+
+    // Passo 2: Verifica na tabela 'order_items' se algum desses pedidos contém o produto específico.
+    const { data: orderItem, error: itemError } = await supabaseAdmin
+      .from('order_items')
+      .select('product_id')
+      .in('order_id', orderIds)        // O item tem de pertencer a um dos pedidos aprovados
+      .eq('product_id', productId) // E tem de ser o produto que estamos a verificar
+      .limit(1)
+      .maybeSingle(); // Pega apenas um resultado, se existir
+
+    if (itemError) throw itemError;
+
+    // Se encontrou um item, 'orderItem' não será nulo.
+    const hasPurchased = !!orderItem;
 
     return new Response(
       JSON.stringify({ hasPurchased }),
@@ -42,7 +59,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Erro na função check-purchase:', error);
+    console.error('Erro na função check-purchase:', error.message);
     return new Response(
       JSON.stringify({ error: error.message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 },

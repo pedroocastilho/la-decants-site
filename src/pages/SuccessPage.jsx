@@ -1,7 +1,16 @@
+import React from 'react'; // Importamos o React
 import { CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAppContext } from '@/contexts/AppContext'; // Importamos o hook do contexto
 
 export function SuccessPage() {
+  const { clearCart } = useAppContext(); // Pegamos a nossa nova função
+
+  // Este useEffect é executado apenas uma vez, quando a página carrega
+  React.useEffect(() => {
+    clearCart(); // Esvazia o carrinho
+  }, []); // O array vazio [] garante que ele só roda uma vez
+
   return (
     <main className="container mx-auto px-4 py-12 text-center flex flex-col items-center">
       <CheckCircle2 className="w-16 h-16 text-green-500 mb-4" />

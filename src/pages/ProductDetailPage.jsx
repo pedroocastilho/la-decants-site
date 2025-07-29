@@ -23,29 +23,25 @@ export function ProductDetailPage() {
 
     const product = allProducts.find(p => p.slug === slug);
 
-    // --- LÓGICA DA GALERIA ---
+    // LÓGICA DA GALERIA (inalterada)
     const images = React.useMemo(() => {
         if (!product) return [];
         return [product.image, product.imageNotes].filter(Boolean);
     }, [product]);
-
     const [selectedImage, setSelectedImage] = React.useState('');
     const [currentIndex, setCurrentIndex] = React.useState(0);
-
     React.useEffect(() => {
         if (images.length > 0) {
             setSelectedImage(images[0]);
             setCurrentIndex(0);
         }
     }, [images]);
-
     const handleNextImage = (e) => {
         e.stopPropagation();
         const nextIndex = (currentIndex + 1) % images.length;
         setCurrentIndex(nextIndex);
         setSelectedImage(images[nextIndex]);
     };
-
     const handlePrevImage = (e) => {
         e.stopPropagation();
         const prevIndex = (currentIndex - 1 + images.length) % images.length;
@@ -53,7 +49,7 @@ export function ProductDetailPage() {
         setSelectedImage(images[prevIndex]);
     };
 
-    // --- LÓGICA DE STOCK ---
+    // LÓGICA DE STOCK (inalterada)
     const isSoldOut = product?.stock === 0;
     const [quantity, setQuantity] = React.useState(1);
     const incrementQuantity = () => {
@@ -62,95 +58,80 @@ export function ProductDetailPage() {
         }
     };
     const decrementQuantity = () => setQuantity(prev => Math.max(1, prev - 1));
-
     React.useEffect(() => {
         if (product && product.stock > 0) {
             setQuantity(1);
         }
     }, [product]);
-
     const handleAddToCart = () => {
         addToCart(product, quantity);
     };
 
-    const relatedProducts = product
-        ? allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 5)
-        : [];
+    // --- INÍCIO DA CORREÇÃO: LÓGICA DE PRODUTOS RELACIONADOS ---
+    const relatedProducts = React.useMemo(() => {
+        if (!product) return [];
 
-    // --- INÍCIO DA NOVA LÓGICA DE AVALIAÇÕES ---
+        return allProducts.filter(p => {
+            // Exclui o próprio produto da lista de relacionados
+            if (p.id === product.id) return false;
+            
+            // Se o produto é da Victoria's Secret, mostra outros da mesma marca
+            if (product.brand === "Victoria's Secret") {
+                return p.brand === "Victoria's Secret";
+            }
+            
+            // Se o produto é Árabe, mostra outros do mesmo tipo
+            if (product.type === "Árabe") {
+                return p.type === "Árabe";
+            }
+            
+            // Para os restantes (Importados), usa a mesma categoria
+            return p.category === product.category && p.type === "Importado";
+
+        }).slice(0, 5); // Limita a 5 produtos relacionados
+    }, [product, allProducts]);
+    // --- FIM DA CORREÇÃO ---
+
+
+    // LÓGICA DE AVALIAÇÕES (inalterada)
     const [reviews, setReviews] = React.useState([]);
     const [loadingReviews, setLoadingReviews] = React.useState(true);
     const [userRating, setUserRating] = React.useState(0);
     const [userComment, setUserComment] = React.useState('');
     const [hasPurchased, setHasPurchased] = React.useState(false);
-
     const averageRating = React.useMemo(() => {
         if (reviews.length === 0) return 0;
         const total = reviews.reduce((acc, review) => acc + review.rating, 0);
         return (total / reviews.length).toFixed(1);
     }, [reviews]);
-
     React.useEffect(() => {
         const fetchReviews = async () => {
             if (!product) return;
             setLoadingReviews(true);
-            const { data, error } = await supabase
-                .from('reviews')
-                .select(`*, profiles(full_name)`)
-                .eq('product_id', product.id)
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                console.error("Erro ao buscar avaliações:", error);
-            } else {
-                setReviews(data);
-            }
+            const { data, error } = await supabase.from('reviews').select(`*, profiles(full_name)`).eq('product_id', product.id).order('created_at', { ascending: false });
+            if (error) { console.error("Erro ao buscar avaliações:", error); } else { setReviews(data); }
             setLoadingReviews(false);
         };
         fetchReviews();
     }, [product]);
-
     React.useEffect(() => {
-      const checkPurchaseStatus = async () => {
-        if (session?.user && product) {
-          const { data, error } = await supabase.functions.invoke('check-purchase', {
-            body: { userId: session.user.id, productId: product.id }
-          });
-          if (error) {
-            console.error("Erro ao verificar compra:", error);
-          } else {
-            setHasPurchased(data.hasPurchased);
-          }
-        } else {
-          setHasPurchased(false);
-        }
-      };
-      checkPurchaseStatus();
+        const checkPurchaseStatus = async () => {
+            if (session?.user && product) {
+                const { data, error } = await supabase.functions.invoke('check-purchase', { body: { userId: session.user.id, productId: product.id } });
+                if (error) { console.error("Erro ao verificar compra:", error); } else { setHasPurchased(data.hasPurchased); }
+            } else {
+                setHasPurchased(false);
+            }
+        };
+        checkPurchaseStatus();
     }, [session, product]);
-
-
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
-        if (userRating === 0) {
-            toast.error("Por favor, selecione uma avaliação de 1 a 5 estrelas.");
-            return;
-        }
-        if (!session?.user) {
-            toast.error("Você precisa de estar autenticado para deixar uma avaliação.");
-            return;
-        }
-
-        const { error } = await supabase.from('reviews').insert({
-            user_id: session.user.id,
-            product_id: product.id,
-            rating: userRating,
-            comment: userComment,
-        });
-
-        if (error) {
-            toast.error("Ocorreu um erro ao enviar a sua avaliação.");
-            console.error("Erro ao inserir avaliação:", error);
-        } else {
+        if (userRating === 0) { toast.error("Por favor, selecione uma avaliação de 1 a 5 estrelas."); return; }
+        if (!session?.user) { toast.error("Você precisa de estar autenticado para deixar uma avaliação."); return; }
+        const { error } = await supabase.from('reviews').insert({ user_id: session.user.id, product_id: product.id, rating: userRating, comment: userComment });
+        if (error) { toast.error("Ocorreu um erro ao enviar a sua avaliação."); console.error("Erro ao inserir avaliação:", error); } 
+        else {
             toast.success("Avaliação enviada com sucesso! Obrigado.");
             const { data } = await supabase.from('reviews').select('*, profiles(full_name)').eq('product_id', product.id).order('created_at', { ascending: false });
             if (data) setReviews(data);
@@ -158,15 +139,12 @@ export function ProductDetailPage() {
             setUserComment('');
         }
     };
-    // --- FIM DA NOVA LÓGICA DE AVALIAÇÕES ---
-
+    
     if (!product) {
         return (
             <main className="container mx-auto px-4 py-12 text-center">
                 <h1 className="text-2xl font-bold">Produto não encontrado</h1>
-                <Link to="/" className="text-[#AB7D47] hover:underline mt-4 inline-block">
-                    Voltar para a página inicial
-                </Link>
+                <Link to="/" className="text-[#AB7D47] hover:underline mt-4 inline-block"> Voltar para a página inicial </Link>
             </main>
         );
     }
@@ -242,7 +220,6 @@ export function ProductDetailPage() {
                         {reviews.length > 0 && (
                           <div className="flex items-center gap-2">
                             <div className="flex items-center">
-                              {/* Mostra as estrelas com base na média */}
                               {[...Array(Math.round(averageRating))].map((_, i) => <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />)}
                               {[...Array(5 - Math.round(averageRating))].map((_, i) => <Star key={i} className="w-4 h-4 text-gray-300" />)}
                             </div>
@@ -296,7 +273,6 @@ export function ProductDetailPage() {
                     </div>
                 </div>
 
-                {/* Seção de Descrição */}
                 <div className="border-t mt-12 pt-8">
                     <h2 className="text-2xl font-bold text-gray-800 mb-4">Descrição</h2>
                     <div
@@ -305,13 +281,29 @@ export function ProductDetailPage() {
                     />
                 </div>
 
-                {/* --- NOVA SECÇÃO DE AVALIAÇÕES --- */}
                 <div className="border-t mt-12 pt-8">
                     <h2 className="text-2xl font-bold text-gray-800 mb-4">Avaliações de Clientes</h2>
                     
                     {session && hasPurchased && (
                         <form onSubmit={handleReviewSubmit} className="mb-8 p-6 border rounded-lg bg-gray-50">
-                          {/* ... (código do formulário inalterado) ... */}
+                            <h3 className="font-semibold mb-2">Deixe a sua avaliação</h3>
+                            <div className="flex items-center gap-1 mb-4">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star
+                                        key={star}
+                                        className={`w-6 h-6 cursor-pointer ${userRating >= star ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                                        onClick={() => setUserRating(star)}
+                                    />
+                                ))}
+                            </div>
+                            <textarea
+                                value={userComment}
+                                onChange={(e) => setUserComment(e.target.value)}
+                                placeholder="Escreva um comentário (opcional)..."
+                                className="w-full p-2 border rounded-md"
+                                rows="3"
+                            ></textarea>
+                            <Button type="submit" className="mt-4 bg-[#AB7D47] hover:bg-[#B8860B]">Enviar Avaliação</Button>
                         </form>
                     )}
 
@@ -334,7 +326,6 @@ export function ProductDetailPage() {
                 </div>
             </main>
 
-            {/* Seção de Produtos Relacionados */}
             {relatedProducts.length > 0 && (
                 <section className="bg-gray-50 py-12 mt-8">
                     <div className="container mx-auto px-4">
