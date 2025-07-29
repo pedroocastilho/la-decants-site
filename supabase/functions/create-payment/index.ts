@@ -55,6 +55,7 @@ serve(async (req) => {
 
     const preference = {
       items: items,
+      external_reference: crypto.randomUUID(),
       metadata: {
         user_id: userId,
         shipping_address: address,

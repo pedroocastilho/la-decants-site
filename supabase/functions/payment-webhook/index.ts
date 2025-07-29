@@ -37,18 +37,27 @@ serve(async (req) => {
         );
 
         // --- INÍCIO DA CORREÇÃO ---
-        // 1. Extrai os metadados da preferência, que é o local correto
-        const preferenceId = paymentDetails.order?.id;
+        // 1. Extraímos o ID da "Preferência" (que é o nosso pedido original)
+        const preferenceId = paymentDetails.external_reference;
+        if (!preferenceId) {
+          // Como fallback, tentamos obter do 'order.id' se disponível
+          const orderId = paymentDetails.order?.id;
+          if(!orderId) throw new Error("ID de referência externa (preference_id) não encontrado no pagamento.");
+        }
+        
+        // 2. Buscamos os detalhes da Preferência para obter os nossos metadados
         const preferenceResponse = await fetch(`https://api.mercadopago.com/checkout/preferences/${preferenceId}`, {
           headers: { 'Authorization': `Bearer ${MP_ACCESS_TOKEN}` },
         });
+        if (!preferenceResponse.ok) throw new Error("Não foi possível obter os detalhes da preferência.");
+        
         const preferenceDetails = await preferenceResponse.json();
         const metadata = preferenceDetails.metadata;
         
         console.log("Metadados extraídos:", metadata);
 
         if (!metadata || !metadata.user_id) {
-          throw new Error("user_id não encontrado nos metadados do pagamento.");
+          throw new Error("user_id não encontrado nos metadados da preferência.");
         }
         
         const userId = metadata.user_id;
@@ -73,7 +82,7 @@ serve(async (req) => {
         console.log("Pedido inserido com sucesso:", orderData);
         
         const orderItems = preferenceDetails.items
-          .filter(item => item.id !== 'shipping')
+          .filter(item => item.id !== 'shipping' && item.id !== 'discount')
           .map(item => ({
             order_id: orderData.id,
             product_id: Number(item.id),
