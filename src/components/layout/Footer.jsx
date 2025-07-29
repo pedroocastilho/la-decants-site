@@ -56,6 +56,21 @@ export function Footer() {
               </a>
             </div>
           </div>
+
+          <div className="border-t border-gray-700 mt-8 pt-6 text-center text-sm text-gray-500">
+            <p>© {new Date().getFullYear()} La Decants | Todos os direitos reservados.</p>
+            <p className="mt-2">
+              Desenvolvido por  
+              <a 
+                href="https://wa.me/5542984393938" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="font-semibold text-gray-600 hover:text-gray-400 transition-colors"
+              >
+                {' '}Pedro Castilho
+              </a>
+            </p>
+          </div>
         </div>
       </footer>
 
