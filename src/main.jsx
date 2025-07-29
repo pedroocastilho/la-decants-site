@@ -13,13 +13,6 @@ import { ProfilePage } from './pages/ProfilePage';
 import { PersonalDataPage } from './pages/profile/PersonalDataPage';
 import { AddressesPage } from './pages/profile/AddressesPage';
 import { OrdersPage } from './pages/profile/OrdersPage';
-import { SuccessPage } from './pages/SuccessPage';
-import { FailurePage } from './pages/FailurePage';
-import { PendingPage } from './pages/PendingPage';
-import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
-import { UpdatePasswordPage } from './pages/UpdatePasswordPage';
-
-// Importa nosso layout e nossas páginas
 import { RootLayout } from './components/layout/RootLayout';
 import { HomePage } from './pages/HomePage';
 import { MasculinosPage } from './pages/MasculinosPage';
@@ -27,6 +20,11 @@ import { FemininosPage } from './pages/FemininosPage';
 import { ContatoPage } from './pages/ContatoPage';
 import { FavoritosPage } from './pages/FavoritosPage';
 import { CheckoutPage } from './pages/CheckoutPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { UpdatePasswordPage } from './pages/UpdatePasswordPage';
+import { SuccessPage } from './pages/SuccessPage';
+import { FailurePage } from './pages/FailurePage';
+import { PendingPage } from './pages/PendingPage';
 
 // Cria o roteador com a definição das nossas rotas
 const router = createBrowserRouter([
@@ -107,8 +105,14 @@ const router = createBrowserRouter([
                 path: 'pedidos',
                 element: <OrdersPage />,
               },
-              { path: 'forgot-password', element: <ForgotPasswordPage /> },
-              { path: 'update-password', element: <UpdatePasswordPage /> },
+              {
+        path: 'forgot-password',
+        element: <ForgotPasswordPage />,
+      },
+              {
+        path: 'update-password',
+        element: <UpdatePasswordPage />,
+      },
             ]
           }
         ]
