@@ -62,9 +62,9 @@ serve(async (req) => {
         coupon_id: appliedCoupon ? appliedCoupon.id : null, 
       },
       back_urls: {
-        success: `https://la-decants-site.vercel.app/success`,
-        failure: `https://la-decants-site.vercel.app/failure`,
-        pending: `https://la-decants-site.vercel.app/pending`,
+        success: `https://www.ladecants.com.br/success`,
+        failure: `https://www.ladecants.com.br/failure`,
+        pending: `https://www.ladecants.com.br/pending`,
       },
       auto_return: "approved",
     };

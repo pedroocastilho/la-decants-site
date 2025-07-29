@@ -71,9 +71,9 @@ export function LoginPage() {
         </div>
 
         <div className="text-right">
-          <a href="#" className="text-sm text-[#AB7D47] hover:underline">
+          <Link to="/forgot-password" className="text-sm text-[#AB7D47] hover:underline">
             Esqueceu a sua senha?
-          </a>
+          </Link>
         </div>
 
         <Button type="submit" className="w-full bg-[#AB7D47] hover:bg-[#B8860B]" disabled={loading}>

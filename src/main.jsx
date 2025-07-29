@@ -16,6 +16,8 @@ import { OrdersPage } from './pages/profile/OrdersPage';
 import { SuccessPage } from './pages/SuccessPage';
 import { FailurePage } from './pages/FailurePage';
 import { PendingPage } from './pages/PendingPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { UpdatePasswordPage } from './pages/UpdatePasswordPage';
 
 // Importa nosso layout e nossas páginas
 import { RootLayout } from './components/layout/RootLayout';
@@ -105,6 +107,8 @@ const router = createBrowserRouter([
                 path: 'pedidos',
                 element: <OrdersPage />,
               },
+              { path: 'forgot-password', element: <ForgotPasswordPage /> },
+              { path: 'update-password', element: <UpdatePasswordPage /> },
             ]
           }
         ]
