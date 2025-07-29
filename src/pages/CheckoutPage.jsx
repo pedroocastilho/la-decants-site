@@ -298,6 +298,20 @@ export function CheckoutPage() {
               </div>
             </div>
 
+            {!isLoadingShipping && shippingOptions.length > 0 && (
+                  <div 
+                    key="retirada" 
+                    className={`flex justify-between items-center p-3 rounded-md cursor-pointer transition-colors ${selectedShipping?.id === 'retirada' ? 'bg-amber-100 border border-amber-300' : 'hover:bg-gray-100'}`}
+                    onClick={() => setSelectedShipping({ id: 'retirada', name: 'Retirar no local (após confirmação)', company: { name: 'Ponto Físico' }, price: '0.00' })}
+                  >
+                    <div>
+                      <p className="font-semibold">Retirar no local</p>
+                      <p className="text-sm text-gray-600">São Mateus do Sul - PR</p>
+                    </div>
+                    <p className="font-semibold">Grátis</p>
+                  </div>
+                )}
+
             {/* Secção de Pagamento */}
             <div>
               <h2 className="text-xl font-semibold mb-4">Pagamento</h2>

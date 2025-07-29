@@ -27,10 +27,14 @@ export function LoginPage() {
     });
 
     if (error) {
-      toast.error(error.message); // Mostra um erro se o login falhar
+      if (error.message === 'Invalid login credentials') {
+        toast.error('E-mail ou senha inválidos. Por favor, tente novamente.');
+      } else {
+        toast.error(error.message); // Mostra outros erros que possam acontecer
+      }
     } else {
       toast.success('Login bem-sucedido!');
-      navigate('/'); // 5. Redireciona para a página inicial em caso de sucesso
+      navigate('/'); 
     }
     setLoading(false);
   };
