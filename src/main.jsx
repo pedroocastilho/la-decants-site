@@ -1,8 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import './index.css'; // ou App.css, o que você usar para estilos globais
+import './index.css'; 
 import './App.css';
+
+// Importações das páginas (o seu código está correto)
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
@@ -26,93 +28,40 @@ import { SuccessPage } from './pages/SuccessPage';
 import { FailurePage } from './pages/FailurePage';
 import { PendingPage } from './pages/PendingPage';
 
-// Cria o roteador com a definição das nossas rotas
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <RootLayout />, // O layout principal que contém o Header e Footer
+    element: <RootLayout />,
     children: [
-      // As páginas (children) que serão renderizadas dentro do RootLayout
+      // --- ROTAS PÚBLICAS ---
+      { index: true, element: <HomePage /> },
+      { path: 'masculinos', element: <MasculinosPage /> },
+      { path: 'femininos', element: <FemininosPage /> },
+      { path: 'contato', element: <ContatoPage /> },
+      { path: 'login', element: <LoginPage /> },
+      { path: 'register', element: <RegisterPage /> },
+      { path: 'produto/:slug', element: <ProductDetailPage /> },
+      { path: 'favoritos', element: <FavoritosPage /> },
+      { path: 'checkout', element: <CheckoutPage /> },
+      { path: 'success', element: <SuccessPage /> },
+      { path: 'failure', element: <FailurePage /> },
+      { path: 'pending', element: <PendingPage /> },
+      { path: 'arabes', element: <ArabesPage /> },
+      { path: 'victorias-secret', element: <VictoriasSecretPage /> },
+      { path: 'forgot-password', element: <ForgotPasswordPage /> },
+      { path: 'update-password', element: <UpdatePasswordPage /> },
+
+      // --- ROTAS PROTEGIDAS ---
       {
-        index: true, // Isso marca a HomePage como a página padrão para o caminho "/"
-        element: <HomePage />,
-      },
-      {
-        path: 'masculinos',
-        element: <MasculinosPage />,
-      },
-      {
-        path: 'femininos',
-        element: <FemininosPage />,
-      },
-      {
-        path: 'contato',
-        element: <ContatoPage />,
-      },
-      {
-        path: 'login',
-        element: <LoginPage />,
-      },
-      {
-        path: 'register',
-        element: <RegisterPage />,
-      },
-      {
-        path: 'produto/:slug', // A rota dinâmica
-        element: <ProductDetailPage />,
-      },
-      {
-        path: 'favoritos',
-        element: <FavoritosPage />,
-      },
-      {
-        path: 'checkout',
-        element: <CheckoutPage />,
-      },
-      { path: 'success',
-         element: <SuccessPage /> 
-        },
-      { path: 'failure',
-         element: <FailurePage /> 
-        },
-      { path: 'pending',
-         element: <PendingPage /> 
-        },
-      {
-        path: 'arabes',
-        element: <ArabesPage />,
-      },
-      {
-        path: 'victorias-secret',
-        element: <VictoriasSecretPage />,
-      },
-      {
-        element: <ProtectedRoute />, // Este componente protege todas as rotas filhas
+        element: <ProtectedRoute />,
         children: [
           {
             path: 'perfil',
             element: <ProfilePage />,
-            children: [ // Sub-rotas para cada secção do perfil
-              {
-                path: 'dados',
-                element: <PersonalDataPage />,
-              },
-              {
-                path: 'enderecos',
-                element: <AddressesPage />,
-              },
-              {
-                path: 'pedidos',
-                element: <OrdersPage />,
-              },
-              {
-        path: 'forgot-password',
-        element: <ForgotPasswordPage />,
-      },
-              {
-        path: 'update-password',
-        element: <UpdatePasswordPage />,
-      },
+            children: [
+              { path: 'dados', element: <PersonalDataPage /> },
+              { path: 'enderecos', element: <AddressesPage /> },
+              { path: 'pedidos', element: <OrdersPage /> },
             ]
           }
         ]
