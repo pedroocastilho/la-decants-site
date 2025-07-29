@@ -28,7 +28,7 @@ serve(async (req) => {
       if (!paymentResponse.ok) throw new Error("Não foi possível obter os detalhes do pagamento.");
 
       const paymentDetails = await paymentResponse.json();
-      console.log("Detalhes do pagamento:", paymentDetails);
+      console.log("Detalhes do pagamento recebidos:", paymentDetails);
 
       if (paymentDetails.status === 'approved') {
         const supabaseAdmin = createClient(
@@ -37,32 +37,20 @@ serve(async (req) => {
         );
 
         // --- INÍCIO DA CORREÇÃO ---
-        // 1. Extraímos o ID da "Preferência" (que é o nosso pedido original)
-        const preferenceId = paymentDetails.external_reference;
-        if (!preferenceId) {
-          // Como fallback, tentamos obter do 'order.id' se disponível
-          const orderId = paymentDetails.order?.id;
-          if(!orderId) throw new Error("ID de referência externa (preference_id) não encontrado no pagamento.");
-        }
-        
-        // 2. Buscamos os detalhes da Preferência para obter os nossos metadados
-        const preferenceResponse = await fetch(`https://api.mercadopago.com/checkout/preferences/${preferenceId}`, {
-          headers: { 'Authorization': `Bearer ${MP_ACCESS_TOKEN}` },
-        });
-        if (!preferenceResponse.ok) throw new Error("Não foi possível obter os detalhes da preferência.");
-        
-        const preferenceDetails = await preferenceResponse.json();
-        const metadata = preferenceDetails.metadata;
-        
+        // 1. Extraímos os metadados DIRETAMENTE dos detalhes do pagamento.
+        const metadata = paymentDetails.metadata;
         console.log("Metadados extraídos:", metadata);
 
         if (!metadata || !metadata.user_id) {
-          throw new Error("user_id não encontrado nos metadados da preferência.");
+          throw new Error("user_id não encontrado nos metadados do pagamento.");
         }
         
         const userId = metadata.user_id;
         const shippingAddress = metadata.shipping_address;
-        const shippingCost = preferenceDetails.shipments?.cost || 0;
+        
+        // 2. Calculamos o custo do frete a partir dos itens do pagamento
+        const shippingItem = paymentDetails.additional_info.items.find(item => item.id === 'shipping');
+        const shippingCost = shippingItem ? Number(shippingItem.unit_price) : 0;
         // --- FIM DA CORREÇÃO ---
 
         const { data: orderData, error: orderError } = await supabaseAdmin
@@ -81,7 +69,7 @@ serve(async (req) => {
         
         console.log("Pedido inserido com sucesso:", orderData);
         
-        const orderItems = preferenceDetails.items
+        const orderItems = paymentDetails.additional_info.items
           .filter(item => item.id !== 'shipping' && item.id !== 'discount')
           .map(item => ({
             order_id: orderData.id,
@@ -90,13 +78,15 @@ serve(async (req) => {
             price: Number(item.unit_price),
           }));
         
-        const { error: itemsError } = await supabaseAdmin
-          .from('order_items')
-          .insert(orderItems);
+        if (orderItems.length > 0) {
+            const { error: itemsError } = await supabaseAdmin
+                .from('order_items')
+                .insert(orderItems);
 
-        if (itemsError) throw itemsError;
+            if (itemsError) throw itemsError;
 
-        console.log("Itens do pedido inseridos com sucesso.");
+            console.log("Itens do pedido inseridos com sucesso.");
+        }
       }
     }
     
