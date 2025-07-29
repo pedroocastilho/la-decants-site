@@ -10,9 +10,11 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from '@/components/ui/badge';
 import { Package } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 export function OrdersPage() {
-  const { session } = useAppContext();
+  // 1. Pegamos também o 'allProducts' para podermos encontrar os detalhes (nome, imagem) dos produtos
+  const { session, allProducts } = useAppContext(); 
   const [orders, setOrders] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
 
@@ -21,7 +23,7 @@ export function OrdersPage() {
       if (!session) return;
       setLoading(true);
 
-      // Busca os pedidos e os itens de cada pedido de uma só vez
+      // 2. Modificamos a busca para incluir também o endereço e o custo do frete
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -29,6 +31,8 @@ export function OrdersPage() {
           created_at,
           total_amount,
           status,
+          shipping_address,
+          shipping_cost,
           order_items!inner(
             price,
             quantity,
@@ -37,8 +41,6 @@ export function OrdersPage() {
         `)
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
-
-        console.log("Dados recebidos do Supabase:", data);
 
       if (error) {
         toast.error("Não foi possível carregar os seus pedidos.");
@@ -55,6 +57,25 @@ export function OrdersPage() {
     return new Date(dateString).toLocaleDateString('pt-BR', {
       day: '2-digit', month: 'long', year: 'numeric'
     });
+  };
+
+  // 3. Função para traduzir o status do pedido
+  const translateStatus = (status) => {
+    switch (status) {
+      case 'approved':
+        return 'Aprovado';
+      case 'pending':
+        return 'Pendente';
+      case 'failure':
+        return 'Falhou';
+      default:
+        return status;
+    }
+  };
+
+  // 4. Função para encontrar os detalhes de um produto pelo seu ID
+  const getProductDetails = (productId) => {
+    return allProducts.find(p => p.id === productId);
   };
 
   return (
@@ -79,25 +100,55 @@ export function OrdersPage() {
             {orders.map(order => (
               <AccordionItem value={`item-${order.id}`} key={order.id}>
                 <AccordionTrigger>
-                  <div className="flex justify-between w-full pr-4">
+                  <div className="flex justify-between w-full pr-4 text-left">
                     <div>
-                      <p className="font-semibold">Pedido #{order.id}</p>
+                      <p className="font-semibold text-lg">Pedido #{order.id}</p>
                       <p className="text-sm text-gray-500">{formatDate(order.created_at)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">R$ {Number(order.total_amount).toFixed(2)}</p>
-                      <Badge variant={order.status === 'approved' ? 'default' : 'secondary'}>{order.status}</Badge>
+                      <p className="font-semibold text-lg">R$ {Number(order.total_amount).toFixed(2)}</p>
+                      {/* 5. Usamos a função para traduzir o status e ajustamos as cores do Badge */}
+                      <Badge className={order.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>{translateStatus(order.status)}</Badge>
                     </div>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <div className="p-4 bg-gray-50 rounded-b-md space-y-2">
-                    <h4 className="font-semibold">Itens do Pedido:</h4>
-                    {/* Aqui exibiremos os detalhes dos itens. Por enquanto, uma mensagem. */}
-                    <p className="text-sm text-gray-600">
-                      {order.order_items.reduce((acc, item) => acc + item.quantity, 0)} item(s) neste pedido.
-                    </p>
-                    {/* No futuro, podemos fazer uma busca pelos nomes dos produtos para mostrar aqui */}
+                  <div className="p-4 bg-gray-50 rounded-b-md space-y-4">
+                    
+                    {/* 6. Nova secção para mostrar os itens do pedido com detalhes */}
+                    <div className="space-y-3">
+                      <h4 className="font-semibold">Itens do Pedido:</h4>
+                      {order.order_items.map(item => {
+                        const product = getProductDetails(item.product_id);
+                        if (!product) return null; // Segurança caso o produto tenha sido removido
+
+                        return (
+                          <div key={item.product_id} className="flex items-center gap-4">
+                            <img src={product.image} alt={product.name} className="w-12 h-12 rounded-md border" />
+                            <div className="flex-grow">
+                              <p className="text-sm font-medium">{product.name}</p>
+                              <p className="text-xs text-gray-500">{item.quantity} x R$ {Number(item.price).toFixed(2)}</p>
+                            </div>
+                            <p className="text-sm font-semibold">R$ {(item.quantity * item.price).toFixed(2)}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <Separator />
+                    
+                    {/* 7. Nova secção para mostrar o endereço de entrega */}
+                    {order.shipping_address && (
+                      <div>
+                        <h4 className="font-semibold mb-2">Enviado para:</h4>
+                        <div className="text-sm text-gray-600">
+                          <p>{order.shipping_address.fullName}</p>
+                          <p>{order.shipping_address.street}, {order.shipping_address.number}</p>
+                          <p>{order.shipping_address.city}, {order.shipping_address.state} - {order.shipping_address.cep}</p>
+                        </div>
+                      </div>
+                    )}
+
                   </div>
                 </AccordionContent>
               </AccordionItem>

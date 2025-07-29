@@ -46,7 +46,7 @@ export function HomePage() {
             <Badge className="ml-2 bg-black text-white">
               {activeFiltersCount}
             </Badge>
-            
+            // Forçando novo build
           )}
         </Button>
         <Select value={sortBy} onValueChange={setSortBy}>
