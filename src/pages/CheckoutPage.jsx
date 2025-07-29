@@ -274,18 +274,34 @@ export function CheckoutPage() {
               </form>
             </div>
             
-            {/* Secção de Envio */}
+            {/* --- SECÇÃO DE ENVIO ATUALIZADA --- */}
             <div>
               <h2 className="text-xl font-semibold mb-4">Método de Envio</h2>
-              <div className="border rounded-lg p-4 space-y-3 min-h-[80px]">
-                {isLoadingShipping && <p className="text-gray-500">Calculando opções de frete...</p>}
-                {!isLoadingShipping && shippingOptions.length === 0 && (
-                  <p className="text-gray-500">Insira o seu CEP para ver as opções de entrega.</p>
-                )}
+              <div className="border rounded-lg p-4 space-y-3">
+                
+                {/* Opção "Retirar no local" agora está fixa aqui */}
+                <div 
+                  key="retirada" 
+                  className={`flex justify-between items-center p-3 rounded-md cursor-pointer transition-colors ${selectedShipping?.id === 'retirada' ? 'bg-gray-200 border-gray-500' : 'hover:bg-gray-100'}`}
+                  onClick={() => setSelectedShipping({ id: 'retirada', name: 'Retirar no local (após confirmação)', company: { name: 'Ponto Físico' }, price: '0.00' })}
+                >
+                  <div>
+                    <p className="font-semibold">Retirar no local</p>
+                    <p className="text-sm text-gray-600">São Mateus do Sul - PR</p>
+                  </div>
+                  <p className="font-semibold">Grátis</p>
+                </div>
+
+                {/* Separador que só aparece se houver outras opções de frete */}
+                {(isLoadingShipping || shippingOptions.length > 0) && <Separator />}
+                
+                {/* Lógica para as outras opções de frete */}
+                {isLoadingShipping && <p className="text-gray-500 text-center">Calculando opções de frete...</p>}
+                
                 {shippingOptions.map(option => (
                   <div 
                     key={option.id} 
-                    className={`flex justify-between items-center p-3 rounded-md cursor-pointer transition-colors ${selectedShipping?.id === option.id ? 'bg-gray-200 border border-black' : 'hover:bg-gray-100'}`}
+                    className={`flex justify-between items-center p-3 rounded-md cursor-pointer transition-colors ${selectedShipping?.id === option.id ? 'bg-gray-200 border border-gray-500' : 'hover:bg-gray-100'}`}
                     onClick={() => setSelectedShipping(option)}
                   >
                     <div>
@@ -297,20 +313,6 @@ export function CheckoutPage() {
                 ))}
               </div>
             </div>
-
-            {!isLoadingShipping && shippingOptions.length > 0 && (
-                  <div 
-                    key="retirada" 
-                    className={`flex justify-between items-center p-3 rounded-md cursor-pointer transition-colors ${selectedShipping?.id === 'retirada' ? 'bg-amber-100 border border-amber-300' : 'hover:bg-gray-100'}`}
-                    onClick={() => setSelectedShipping({ id: 'retirada', name: 'Retirar no local (após confirmação)', company: { name: 'Ponto Físico' }, price: '0.00' })}
-                  >
-                    <div>
-                      <p className="font-semibold">Retirar no local</p>
-                      <p className="text-sm text-gray-600">São Mateus do Sul - PR</p>
-                    </div>
-                    <p className="font-semibold">Grátis</p>
-                  </div>
-                )}
 
             {/* Secção de Pagamento */}
             <div>
