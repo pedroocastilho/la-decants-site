@@ -21,7 +21,7 @@ export function CheckoutPage() {
   // --- Estados ---
   const [savedAddresses, setSavedAddresses] = React.useState([]);
   const [address, setAddress] = React.useState({
-    fullName: '', cep: '', street: '', number: '', complement: '',
+    fullName: '', cpf: '', phone: '', cep: '', street: '', number: '', complement: '',
     neighborhood: '', city: '', state: '',
   });
   const [shippingOptions, setShippingOptions] = React.useState([]);
@@ -78,6 +78,8 @@ export function CheckoutPage() {
       neighborhood: savedAddr.neighborhood || '',
       city: savedAddr.city || '',
       state: savedAddr.state || '',
+      cpf: savedAddr.cpf || '',
+      phone: savedAddr.phone || '',
     });
     setShippingOptions([]);
     setSelectedShipping(null);
@@ -253,6 +255,28 @@ export function CheckoutPage() {
               
               <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
                 <Input id="fullName" value={address.fullName} onChange={handleAddressChange} type="text" placeholder="Nome completo" required />
+
+                {/* --- INÍCIO DA ADIÇÃO --- */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input 
+                    id="cpf" 
+                    value={address.cpf} 
+                    onChange={handleAddressChange} 
+                    type="text" 
+                    placeholder="CPF (apenas números)" 
+                    required 
+                  />
+                  <Input 
+                    id="phone" 
+                    value={address.phone} 
+                    onChange={handleAddressChange} 
+                    type="tel" 
+                    placeholder="Telefone com DDD" 
+                    required 
+                  />
+                </div>
+                {/* --- FIM DA ADIÇÃO --- */}
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="sm:col-span-2">
                     <Input id="cep" value={address.cep} onChange={(e) => setAddress(prev => ({ ...prev, cep: e.target.value.replace(/\D/g, '') }))} type="text" placeholder="CEP" required maxLength={8} />
