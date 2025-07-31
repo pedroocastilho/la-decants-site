@@ -15,7 +15,7 @@ export function AddressesPage() {
   
   // 1. Adicionamos os novos campos ao estado inicial do formulário
   const [newAddress, setNewAddress] = React.useState({
-    fullName: '', cpf: '', phone: '', cep: '', street: '', number: '', 
+    fullName: '', cpf: '', phone: '', email: '', cep: '', street: '', number: '', 
     complement: '', neighborhood: '', city: '', state: ''
   });
 
@@ -53,6 +53,7 @@ export function AddressesPage() {
       full_name: newAddress.fullName,
       cpf: newAddress.cpf,
       phone: newAddress.phone,
+      email: newAddress.email,
       cep: newAddress.cep,
       street: newAddress.street,
       number: newAddress.number,
@@ -111,6 +112,10 @@ export function AddressesPage() {
               <Label htmlFor="fullName">Nome do Destinatário</Label>
               <Input id="fullName" value={newAddress.fullName} onChange={handleInputChange} required />
             </div>
+            <div className="md:col-span-2">
+              <Label htmlFor="email">E-mail de Contato</Label>
+              <Input id="email" type="email" value={newAddress.email} onChange={handleInputChange} placeholder="Para notificações sobre a entrega" required />
+            </div>
             <div>
               <Label htmlFor="cpf">CPF</Label>
               <Input id="cpf" value={newAddress.cpf} onChange={handleInputChange} placeholder="Apenas números" required />
@@ -139,6 +144,7 @@ export function AddressesPage() {
               <div>
                 <p className="font-semibold">{addr.full_name}</p>
                 {/* 4. Mostramos o telefone na lista de endereços guardados */}
+                <p className="text-sm text-gray-600">{addr.email}</p>
                 <p className="text-sm text-gray-600">{addr.phone}</p>
                 <p className="text-sm text-gray-600">{addr.street}, {addr.number}</p>
                 <p className="text-sm text-gray-600">{addr.neighborhood} - {addr.city}, {addr.state}</p>

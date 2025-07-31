@@ -44,6 +44,8 @@ serve(async (req) => {
         if (!metadata || !metadata.user_id) {
           throw new Error("user_id não encontrado nos metadados do pagamento.");
         }
+
+        const customerEmail = paymentDetails.payer.email;
         
         const userId = metadata.user_id;
         const shippingAddress = metadata.shipping_address;
@@ -58,6 +60,7 @@ serve(async (req) => {
           .from('orders')
           .insert({
             user_id: userId,
+            customer_email: customerEmail,
             total_amount: paymentDetails.transaction_amount,
             status: 'approved',
             shipping_address: shippingAddress,
