@@ -33,7 +33,7 @@ export function Header({ onCartClick }) {
             <a href="https://www.tiktok.com/@la.decants?_t=ZM-8yJCDke0egw&_r=1" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
               <SiTiktok className="w-5 h-5 cursor-pointer text-[#3b2712] hover:text-gray-400" />
             </a>
-            <a href="https://wa.me/5542988341674" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+            <a href="https://wa.me/5542988340562" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
               <FaWhatsapp className="w-5 h-5 cursor-pointer text-[#3b2712] hover:text-gray-400" />
             </a>
           </div>
