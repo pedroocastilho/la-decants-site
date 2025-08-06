@@ -1,6 +1,7 @@
 // src/pages/HomePage.jsx
 
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useAppContext } from '@/contexts/AppContext';
 import { ProductGrid } from '@/features/products/ProductGrid';
 import { Button } from '@/components/ui/button';
@@ -25,11 +26,18 @@ export function HomePage() {
   } = useAppContext();
 
   return (
-    // 1. Usamos um Fragment <> para envolver o Carrossel e o conteúdo principal
+    
     <>
-      <HeroCarousel />
+      {/* --- 2. BLOCO DE SEO  --- */}
+      <Helmet>
+        <title>La Decants | Decants de Perfumes Importados e Árabes</title>
+        <meta 
+          name="description" 
+          content="Descubra e experimente fragrâncias de luxo com os decants da La Decants. Perfumes importados e árabes em frascos de 5ml, 10ml e mais. Compra segura e frete para todo o Brasil."
+        />
+      </Helmet>
 
-      {/* 2. O resto do conteúdo da sua página fica dentro do <main> */}
+      <HeroCarousel />
       <main className="container mx-auto px-4 py-8 flex-grow">
         <div className="text-sm text-gray-600 mb-3">
           <span>Início</span> <span className="mx-2">›</span> <span className="text-[#AB7D47]">DECANTS</span>

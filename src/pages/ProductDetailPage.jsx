@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useParams, Link } from 'react-router-dom';
 import { useAppContext } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
@@ -145,14 +146,23 @@ export function ProductDetailPage() {
             <main className="container mx-auto px-4 py-12 text-center">
                 <h1 className="text-2xl font-bold">Produto não encontrado</h1>
                 <Link to="/" className="text-[#AB7D47] hover:underline mt-4 inline-block"> Voltar para a página inicial </Link>
+                <Helmet>
+          <title>Produto Não Encontrado | La Decants</title>
+        </Helmet>
+        <main className="container mx-auto px-4 py-12 text-center"></main>
             </main>
         );
     }
 
+    const metaDescription = product.description.substring(0, 155).replace(/<[^>]*>?/gm, '');
     const isFavorite = favorites.has(product.id);
 
     return (
         <>
+           <Helmet>
+        <title>{`${product.name} | La Decants`}</title>
+        <meta name="description" content={`${metaDescription}...`} />
+      </Helmet>
             <main className="container mx-auto px-4 py-8">
                 <div className="text-sm text-gray-600 mb-6">
                     <Link to="/" className="hover:text-black">Início</Link>
