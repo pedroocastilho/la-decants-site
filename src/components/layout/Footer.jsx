@@ -62,12 +62,12 @@ export function Footer() {
             <p className="mt-2">
               Desenvolvido por  
               <a 
-                href="https://wa.me/5542984393938" 
+                href="https://www.castilhodev.com.br" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="font-semibold text-gray-600 hover:text-gray-400 transition-colors"
               >
-                {' '}Pedro Castilho
+                {' '}Castilho DEV
               </a>
             </p>
           </div>

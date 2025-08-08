@@ -157,13 +157,53 @@ export function ProductDetailPage() {
     const metaDescription = product.description.substring(0, 155).replace(/<[^>]*>?/gm, '');
     const isFavorite = favorites.has(product.id);
 
+    const generateProductSchema = () => {
+    if (!product) return null;
+
+    const schema = {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": product.name,
+      "image": `https://www.ladecants.com.br${product.image}`, // URL completo da imagem
+      "description": metaDescription,
+      "brand": {
+        "@type": "Brand",
+        "name": product.brand
+      },
+      "sku": product.id,
+      "offers": {
+        "@type": "Offer",
+        "url": `https://www.ladecants.com.br/produto/${product.slug}`,
+        "priceCurrency": "BRL",
+        "price": product.price.toFixed(2),
+        "availability": isSoldOut ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+        "itemCondition": "https://schema.org/NewCondition"
+      }
+    };
+
+    if (reviews.length > 0) {
+      schema.aggregateRating = {
+        "@type": "AggregateRating",
+        "ratingValue": averageRating,
+        "reviewCount": reviews.length
+      };
+    }
+
+    return JSON.stringify(schema);
+  };
+
     return (
-        <>
-           <Helmet>
+    <>
+      <Helmet>
         <title>{`${product.name} | La Decants`}</title>
         <meta name="description" content={`${metaDescription}...`} />
+        {/* --- Adicionamos o script de dados estruturados aqui --- */}
+        <script type="application/ld+json">
+          {generateProductSchema()}
+        </script>
       </Helmet>
-            <main className="container mx-auto px-4 py-8">
+
+      <main className="container mx-auto px-4 py-8">
                 <div className="text-sm text-gray-600 mb-6">
                     <Link to="/" className="hover:text-black">Início</Link>
                     <span className="mx-2">›</span>
